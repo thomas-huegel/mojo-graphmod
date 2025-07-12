@@ -1,0 +1,12 @@
+[workspace]
+authors = ["Thomas Hügel <thomas.huegel@aquilenet.fr>"]
+channels = ["https://conda.modular.com/max-nightly", "conda-forge"]
+name = "mojo-graphmod"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+main = { cmd = "pixi run mojo run src/main.mojo" }
+
+[dependencies]
+modular = "==25.5.0.dev2025070905"

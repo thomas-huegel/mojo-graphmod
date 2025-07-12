@@ -1,2 +1,2 @@
-/target
-/tests/**/target
+# pixi environments
+.pixi
