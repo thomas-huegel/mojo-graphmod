@@ -5,12 +5,13 @@
 from os.os import listdir
 from pathlib.path import Path
 
-from trie import Trie
+from dependencies_graph import DependenciesGraph
 
-fn build_dependencies_trie(directory: Path) raises -> Trie:
+
+fn build_dependencies_trie(directory: Path) raises -> DependenciesGraph:
     for file in listdir(directory):
         print(file)
-    return Trie()
+    return DependenciesGraph()
 
 
 # pub fn build_dependencies_trie<LanguageParser: Parser>(
