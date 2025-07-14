@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 
-from dependencies_graph import DependenciesGraph
+from dependencies import DependencyPath
 
 
-trait Formatter:
+trait Parser:
     @staticmethod
-    fn show(trie: DependenciesGraph) raises -> String:
+    fn parse_dependencies(file_contents: String) -> List[DependencyPath]:
         pass

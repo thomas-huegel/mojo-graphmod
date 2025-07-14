@@ -29,12 +29,25 @@ struct FilePathList(Copyable, Defaultable, Movable, Representable):
         for path in paths:
             self.value.append(FilePath(path))
 
-    # fn __bool__(self):
-    #     return self.value
-
     fn __repr__(self) -> String:
         return "FilePathList(value=" + self.value.__str__() + ")"
 
 
-struct DependencyPath:
+@fieldwise_init
+struct DependencyPath(Copyable, EqualityComparable, Movable, Representable):
     var value: List[String]
+
+    fn append(mut self, element: String):
+        self.value.append(element)
+
+    fn __eq__(self, other: Self) -> Bool:
+        return self.value == other.value
+
+    fn __ne__(self, other: Self) -> Bool:
+        return self.value != other.value
+
+    # fn __str__(self) -> String:
+    #     return self.value.__str__()
+
+    fn __repr__(self) -> String:
+        return "DependencyPath(value=" + self.value.__str__() + ")"
