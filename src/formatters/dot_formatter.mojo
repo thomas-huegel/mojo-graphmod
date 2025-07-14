@@ -2,244 +2,101 @@
 # This file is part of Mojo Graphmod.
 # SPDX-License-Identifier: GPL-3.0-only
 
+from collections import Deque, Set
+
+from dependencies import FilePath
+from dependencies_graph import DependenciesGraph
+from formatter import Formatter
+from formatters.colors import make_gray, make_pseudorandom_color
 from trie import Trie
 
-fn display(trie: Trie) -> String:
-    return "Hello, trie!"
+
+alias OUTPUT_SEPARATOR = "::"
+alias CLUSTER_SEPARATOR = "___"
 
 
-# const OUTPUT_SEPARATOR: &str = "::";
-# const CLUSTER_SEPARATOR: &str = "___";
+fn _cluster_id(path: String) -> String:
+    return CLUSTER_SEPARATOR.join(path.split(OUTPUT_SEPARATOR))
 
-# fn cluster_id(path: &str) -> String {
-#     path.split(OUTPUT_SEPARATOR)
-#         .collect::<Vec<_>>()
-#         .join(CLUSTER_SEPARATOR)
-# }
 
-# fn show_vertices(trie: &DependenciesGraph, dirname: &str, basename: &str, level: usize) -> String {
-#     let path = if basename.is_empty() {
-#         String::new()
-#     } else {
-#         String::from(dirname) + OUTPUT_SEPARATOR + basename
-#     };
-#     let indentation = "  ".repeat(level);
-#     if trie.children.is_empty() {
-#         format!(
-#             "{}\"{}\"[label=\"{}\",style=\"filled\",fillcolor=\"{}\"]\n",
-#             indentation,
-#             path,
-#             basename,
-#             colors::make_random_color(dirname)
-#         )
-#     } else {
-#         format!("{}subgraph cluster_{} {{\n", indentation, cluster_id(&path))
-#             + &format!("{}label=\"{}\"\n", indentation, basename)
-#             + &format!("{}color=\"{}\"\n", indentation, colors::make_gray(level))
-#             + &format!("{}style=\"filled\"\n", indentation)
-#             + &trie
-#                 .children
-#                 .iter()
-#                 .map(|(bname, trie)| show_vertices(trie, &path, bname, level + 1))
-#                 .collect::<Vec<_>>()
-#                 .join("")
-#             + &format!("{}}}\n", indentation)
-#     }
-# }
+fn _show_vertices(trie: DependenciesGraph, dirname: String, basename: String, level: UInt) raises -> String:
+    var path = "" if not basename else dirname + OUTPUT_SEPARATOR + basename
+    var indentation = "  " * level
+    if len(trie.children) == 0:
+        return String("{}\"{}\"[label=\"{}\",style=\"filled\",fillcolor=\"{}\"]\n").format(
+            indentation,
+            path,
+            basename,
+            make_pseudorandom_color(dirname)
+        )
+    else:
+        var result = String("{}subgraph cluster_{} {{\n").format(indentation, _cluster_id(path))
+            + String("{}label=\"{}\"\n").format(indentation, basename)
+            + String("{}color=\"{}\"\n").format(indentation, make_gray(level))
+            + String("{}style=\"filled\"\n").format(indentation)
+        for child in trie.children.items():
+            res = _show_vertices(child.value, path, child.key, level + 1)
+            result += res
+        return result + String("{}}}\n").format(indentation)
+    
 
-# fn make_vertex(path: &FilePath) -> String {
-#     OUTPUT_SEPARATOR.to_owned() + &path.0.join(OUTPUT_SEPARATOR)
-# }
+fn _make_vertex(path: FilePath) -> String:
+    return OUTPUT_SEPARATOR + OUTPUT_SEPARATOR.join(path.value)
 
-# fn make_arrow<Processor: DependencyProcessor>(
-#     trie: &DependenciesGraph,
-#     current_path: &FilePath,
-#     dependency: &DependencyPath,
-#     pkg_name: &str,
-# ) -> Option<String> {
-#     let target = Processor::compute_target(trie, current_path, dependency, pkg_name);
-#     if target.0.is_empty() {
-#         None
-#     } else {
-#         Some(
-#             String::from("\"")
-#                 + &make_vertex(current_path)
-#                 + "\" -> \""
-#                 + &make_vertex(&target)
-#                 + "\"",
-#         )
-#     }
-# }
 
-# fn show_dependencies_from_vertex<Processor: DependencyProcessor>(
-#     current_trie: &DependenciesGraph,
-#     whole_trie: &DependenciesGraph,
-#     current_path: &FilePath,
-#     pkg_name: &str,
-# ) -> Option<String> {
-#     current_trie.value.as_ref().map(|dependencies| {
-#         dependencies
-#             .iter()
-#             .filter_map(|dependency| {
-#                 make_arrow::<Processor>(whole_trie, current_path, dependency, pkg_name)
-#             })
-#             .collect::<Set<_>>()
-#             .into_iter()
-#             .collect::<Vec<_>>()
-#             .join("\n")
-#     })
-# }
+fn _make_arrow(
+    trie: DependenciesGraph,
+    current_path: FilePath,
+    dependency: FilePath,
+) raises -> Optional[String]:
+    if len(dependency) == 0:
+        return None
+    else:
+        return String('"{}" -> "{}"').format(
+            _make_vertex(current_path), _make_vertex(dependency)
+        )
 
-# fn show_arcs<Processor: DependencyProcessor>(
-#     current_trie: &DependenciesGraph,
-#     whole_trie: &DependenciesGraph,
-#     FilePath(path): &FilePath,
-#     pkg_name: &str,
-# ) -> String {
-#     show_dependencies_from_vertex::<Processor>(
-#         current_trie,
-#         whole_trie,
-#         &FilePath(path.clone()),
-#         pkg_name,
-#     )
-#     .unwrap_or_default()
-#         + &current_trie
-#             .children
-#             .iter()
-#             .map(|(name, child)| {
-#                 let mut new_path = path.clone();
-#                 new_path.push(name.clone());
-#                 show_arcs::<Processor>(child, whole_trie, &FilePath(new_path), pkg_name)
-#             })
-#             .filter(|s| !s.is_empty())
-#             .collect::<Vec<_>>()
-#             .join("\n")
-# }
 
-# pub struct DotFormatter {}
+fn _show_dependencies_from_vertex(
+    current_trie: DependenciesGraph,
+    whole_trie: DependenciesGraph,
+    current_path: FilePath,
+) raises -> Optional[String]:
+    var result = List[String]()
+    if not current_trie.value:
+        return None
+    else:
+        for dependency in current_trie.value.value().value:
+            var arrow = _make_arrow(whole_trie, current_path, dependency)
+            if arrow:
+                result.append(arrow.value())
+        return String("\n").join(result)
 
-# impl Formatter for DotFormatter {
-#     fn show<Processor: DependencyProcessor>(trie: &DependenciesGraph, pkg_name: &str) -> String {
-#         String::from("digraph dependencies {\n")
-#             + &show_vertices(trie, "", "", 1)
-#             + &show_arcs::<Processor>(trie, trie, &FilePath(vec![]), pkg_name)
-#             + "\n}\n"
-#     }
-# }
+fn _show_arcs(
+    current_trie: DependenciesGraph,
+    whole_trie: DependenciesGraph,
+    path: FilePath,
+) raises -> String:
+    var result = _show_dependencies_from_vertex(
+        current_trie,
+        whole_trie,
+        path,
+    ).or_else("")
 
-# #[cfg(test)]
-# mod tests {
-#     use std::collections::BTreeMap as Map;
+    for child in current_trie.children.items():
+        var new_path = path + FilePath([child.key])
+        var arcs = _show_arcs(child.value, whole_trie, new_path)
+        if arcs:
+            result += arcs + "\n"
 
-#     use crate::{
-#         dependencies::DependencyPath,
-#         dependencies_graph::DependenciesGraph,
-#         dependencies_processor::rust_processor::target_computer::RustDependencyProcessor,
-#         formatter::{dot_formatter::DotFormatter, Formatter},
-#     };
+    return result
 
-#     fn make_trie() -> DependenciesGraph {
-#         DependenciesGraph {
-#             value: None,
-#             children: Map::from([
-#                 (
-#                     String::from("lib"),
-#                     DependenciesGraph {
-#                         value: None,
-#                         children: Map::new(),
-#                     },
-#                 ),
-#                 (
-#                     String::from("foo"),
-#                     DependenciesGraph {
-#                         value: None,
-#                         children: Map::from([
-#                             (
-#                                 String::from("bar"),
-#                                 DependenciesGraph {
-#                                     value: Some(vec![
-#                                         DependencyPath(vec![
-#                                             String::from("crate"),
-#                                             String::from("abc"),
-#                                         ]),
-#                                         DependencyPath(vec![String::from("std")]),
-#                                     ]),
-#                                     children: Map::new(),
-#                                 },
-#                             ),
-#                             (
-#                                 String::from("mod"),
-#                                 DependenciesGraph {
-#                                     value: Some(vec![DependencyPath(vec![
-#                                         String::from("bar"),
-#                                         String::from("baz"),
-#                                     ])]),
-#                                     children: Map::new(),
-#                                 },
-#                             ),
-#                         ]),
-#                     },
-#                 ),
-#                 (
-#                     String::from("abc"),
-#                     DependenciesGraph {
-#                         value: Some(vec![
-#                             DependencyPath(vec![
-#                                 String::from("crate"),
-#                                 String::from("foo"),
-#                                 String::from("Panel"),
-#                             ]),
-#                             DependencyPath(vec![String::from("crate"), String::from("Widget")]),
-#                         ]),
-#                         children: Map::new(),
-#                     },
-#                 ),
-#                 (
-#                     String::from("def"),
-#                     DependenciesGraph {
-#                         value: Some(vec![DependencyPath(vec![
-#                             String::from("crate"),
-#                             String::from("foo"),
-#                             String::from("bar"),
-#                             String::from("Widget"),
-#                         ])]),
-#                         children: Map::new(),
-#                     },
-#                 ),
-#             ]),
-#         }
-#     }
+struct DotFormatter(Formatter):
+    @staticmethod
+    fn show(trie: DependenciesGraph) raises -> String:
+        return "digraph dependencies {\n"
+            + _show_vertices(trie, "", "", 1)
+            + _show_arcs(trie, trie, FilePath([]))
+            + "\n}\n"
 
-#     #[test]
-#     fn it_outputs_to_dot() {
-#         let trie = make_trie();
-#         let result = DotFormatter::show::<RustDependencyProcessor>(&trie, "my_crate");
-#         let expected = String::from(
-#             r##"digraph dependencies {
-#   subgraph cluster_ {
-#   label=""
-#   color="#eeeeee"
-#   style="filled"
-#     "::abc"[label="abc",style="filled",fillcolor="#e3f38b"]
-#     "::def"[label="def",style="filled",fillcolor="#e3f38b"]
-#     subgraph cluster____foo {
-#     label="foo"
-#     color="#dddddd"
-#     style="filled"
-#       "::foo::bar"[label="bar",style="filled",fillcolor="#eab6e8"]
-#       "::foo::mod"[label="mod",style="filled",fillcolor="#eab6e8"]
-#     }
-#     "::lib"[label="lib",style="filled",fillcolor="#e3f38b"]
-#   }
-# "::abc" -> "::foo::mod"
-# "::abc" -> "::lib"
-# "::def" -> "::foo::bar"
-# "::foo::bar" -> "::abc"
-# "::foo::bar" -> "::std"
-# "::foo::mod" -> "::foo::bar"
-# }
-# "##,
-#         );
-#         assert_eq!(result, expected);
-#     }
-# }
+

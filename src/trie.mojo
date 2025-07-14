@@ -43,20 +43,23 @@ struct Trie[
             + ")"
         )
 
-    fn insert(mut self, mut k: Deque[K], v: V) raises -> Optional[V]:
+    fn insert(mut self, owned k: Deque[K], owned v: V) raises -> Optional[V]:
         if not k:
             var old_value = self.value
-            self.value = v
+            self.value = v^
             return old_value
         else:
             var elt = k.popleft()
             if self.children.get(elt):
-                return self.children[elt].insert(k, v)
+                return self.children[elt].insert(k^, v^)
             else:
                 var trie = Trie[K, V]()
-                var value = trie.insert(k, v)
+                var value = trie.insert(k^, v^)
                 self.children[elt] = trie^
                 return value
+
+    fn insert2(mut self, owned k: List[K], owned v: V) raises -> Optional[V]:
+        return self.insert(Deque(elements=k^), v^)
 
     fn get_longest_prefix(self, k: List[K]) raises -> (List[K], NodeKind):
         var n = len(k)

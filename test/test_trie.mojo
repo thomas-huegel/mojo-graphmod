@@ -11,7 +11,7 @@ from trie import NodeKind, Trie
 fn test_it_builds_a_one_branch_trie() raises:
     var trie = Trie[Int, Int]()
     var k = Deque(elements=Optional[List[Int]]([1, 2]))
-    _ = trie.insert(k, 10)
+    _ = trie.insert(k^, 10)
     assert_equal(
         repr(trie),
         (
@@ -25,8 +25,8 @@ fn test_it_builds_a_two_branch_trie() raises:
     var trie = Trie[Int, Int]()
     var k2 = Deque(elements=Optional[List[Int]]([1, 2]))
     var k3 = Deque(elements=Optional[List[Int]]([1, 3]))
-    _ = trie.insert(k2, 20)
-    _ = trie.insert(k3, 30)
+    _ = trie.insert(k2^, 20)
+    _ = trie.insert(k3^, 30)
     assert_equal(
         repr(trie),
         (
@@ -40,8 +40,8 @@ fn test_it_computes_the_longest_prefix() raises:
     var trie = Trie[Int, Int]()
     var k2 = Deque(elements=Optional[List[Int]]([1, 2]))
     var k3 = Deque(elements=Optional[List[Int]]([1, 3]))
-    _ = trie.insert(k2, 20)
-    _ = trie.insert(k3, 30)
+    _ = trie.insert(k2^, 20)
+    _ = trie.insert(k3^, 30)
     var a1 = [1, 3, 4]
     var prefix1 = trie.get_longest_prefix(a1)
     assert_equal(prefix1[0], a1[0:2])
