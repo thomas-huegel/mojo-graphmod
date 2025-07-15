@@ -3,83 +3,79 @@ digraph dependencies {
   label=""
   color="#eeeeee"
   style="filled"
-    "::app_builder"[label="app_builder",style="filled",fillcolor="#e3f38b"]
-    "::dependencies"[label="dependencies",style="filled",fillcolor="#e3f38b"]
-    "::dependencies_graph"[label="dependencies_graph",style="filled",fillcolor="#e3f38b"]
-    subgraph cluster____dependencies_processor {
-    label="dependencies_processor"
-    color="#dddddd"
-    style="filled"
-      "::dependencies_processor::mod"[label="mod",style="filled",fillcolor="#e787f7"]
-      subgraph cluster____dependencies_processor___rust_processor {
-      label="rust_processor"
-      color="#cccccc"
-      style="filled"
-        "::dependencies_processor::rust_processor::dependency_expander"[label="dependency_expander",style="filled",fillcolor="#d2bee0"]
-        "::dependencies_processor::rust_processor::mod"[label="mod",style="filled",fillcolor="#d2bee0"]
-        "::dependencies_processor::rust_processor::target_computer"[label="target_computer",style="filled",fillcolor="#d2bee0"]
-      }
-    }
-    "::files_reader"[label="files_reader",style="filled",fillcolor="#e3f38b"]
-    subgraph cluster____formatter {
-    label="formatter"
-    color="#dddddd"
-    style="filled"
-      "::formatter::colors"[label="colors",style="filled",fillcolor="#c0a4ba"]
-      "::formatter::dot_formatter"[label="dot_formatter",style="filled",fillcolor="#c0a4ba"]
-      "::formatter::mod"[label="mod",style="filled",fillcolor="#c0a4ba"]
-    }
-    "::lib"[label="lib",style="filled",fillcolor="#e3f38b"]
     "::main"[label="main",style="filled",fillcolor="#e3f38b"]
-    subgraph cluster____parser {
-    label="parser"
+    "::app_builder"[label="app_builder",style="filled",fillcolor="#e3f38b"]
+    "::files_reader"[label="files_reader",style="filled",fillcolor="#e3f38b"]
+    subgraph cluster____formatters {
+    label="formatters"
     color="#dddddd"
     style="filled"
-      "::parser::mod"[label="mod",style="filled",fillcolor="#8eeab4"]
-      "::parser::rust_parser"[label="rust_parser",style="filled",fillcolor="#8eeab4"]
+      "::formatters::dot_formatter"[label="dot_formatter",style="filled",fillcolor="#86c2dc"]
+      "::formatters::__init__"[label="__init__",style="filled",fillcolor="#86c2dc"]
+      "::formatters::colors"[label="colors",style="filled",fillcolor="#86c2dc"]
     }
     "::trie"[label="trie",style="filled",fillcolor="#e3f38b"]
+    "::dependencies"[label="dependencies",style="filled",fillcolor="#e3f38b"]
+    "::dependencies_graph"[label="dependencies_graph",style="filled",fillcolor="#e3f38b"]
+    "::formatter"[label="formatter",style="filled",fillcolor="#e3f38b"]
+    "::parser"[label="parser",style="filled",fillcolor="#e3f38b"]
+    subgraph cluster____parsers {
+    label="parsers"
+    color="#dddddd"
+    style="filled"
+      "::parsers::__init__"[label="__init__",style="filled",fillcolor="#b797e7"]
+      "::parsers::mojo_parser"[label="mojo_parser",style="filled",fillcolor="#b797e7"]
+    }
+    "::filter"[label="filter",style="filled",fillcolor="#e3f38b"]
+    subgraph cluster____filters {
+    label="filters"
+    color="#dddddd"
+    style="filled"
+      "::filters::__init__"[label="__init__",style="filled",fillcolor="#a8acb2"]
+      "::filters::depth"[label="depth",style="filled",fillcolor="#a8acb2"]
+    }
   }
+"::main" -> "::pathlib::path"
+"::main" -> "::sys"
+"::main" -> "::app_builder"
+"::app_builder" -> "::pathlib::path"
 "::app_builder" -> "::dependencies_graph"
-"::app_builder" -> "::dependencies_processor::rust_processor::target_computer"
 "::app_builder" -> "::files_reader"
-"::app_builder" -> "::formatter::dot_formatter"
-"::app_builder" -> "::formatter::mod"
-"::app_builder" -> "::parser::rust_parser"
-"::app_builder" -> "::std"
+"::app_builder" -> "::filters::depth"
+"::app_builder" -> "::formatters::dot_formatter"
+"::app_builder" -> "::parsers::mojo_parser"
+"::files_reader" -> "::os::os"
+"::files_reader" -> "::os::path"
+"::files_reader" -> "::pathlib::path"
+"::files_reader" -> "::dependencies_graph"
+"::files_reader" -> "::filter"
+"::files_reader" -> "::parser"
+"::formatters::dot_formatter" -> "::collections"
+"::formatters::dot_formatter" -> "::dependencies"
+"::formatters::dot_formatter" -> "::dependencies_graph"
+"::formatters::dot_formatter" -> "::formatter"
+"::formatters::dot_formatter" -> "::formatters::colors"
+"::formatters::dot_formatter" -> "::trie"
+"::formatters::colors" -> "::pathlib::path"
+
+"::trie" -> "::collections"
+"::dependencies" -> "::hashlib::hasher"
+"::dependencies_graph" -> "::collections"
 "::dependencies_graph" -> "::dependencies"
 "::dependencies_graph" -> "::trie"
-"::dependencies_processor::mod" -> "::dependencies"
-"::dependencies_processor::mod" -> "::dependencies_graph"
-"::dependencies_processor::rust_processor::dependency_expander" -> "::dependencies"
-"::dependencies_processor::rust_processor::dependency_expander" -> "::dependencies_processor::rust_processor::mod"
-"::dependencies_processor::rust_processor::dependency_expander" -> "::std"
-"::dependencies_processor::rust_processor::mod" -> "::dependencies"
-"::dependencies_processor::rust_processor::target_computer" -> "::dependencies"
-"::dependencies_processor::rust_processor::target_computer" -> "::dependencies_graph"
-"::dependencies_processor::rust_processor::target_computer" -> "::dependencies_processor::mod"
-"::dependencies_processor::rust_processor::target_computer" -> "::dependencies_processor::rust_processor::dependency_expander"
-"::dependencies_processor::rust_processor::target_computer" -> "::dependencies_processor::rust_processor::mod"
-"::dependencies_processor::rust_processor::target_computer" -> "::trie"
-"::files_reader" -> "::dependencies_graph"
-"::files_reader" -> "::parser::mod"
-"::files_reader" -> "::std"
-"::formatter::dot_formatter" -> "::dependencies"
-"::formatter::dot_formatter" -> "::dependencies_graph"
-"::formatter::dot_formatter" -> "::dependencies_processor::mod"
-"::formatter::dot_formatter" -> "::formatter::colors"
-"::formatter::dot_formatter" -> "::formatter::mod"
-"::formatter::dot_formatter" -> "::std"
-"::formatter::mod" -> "::dependencies_graph"
-"::formatter::mod" -> "::dependencies_processor::mod"
-"::main" -> "::app_builder"
-"::main" -> "::std"
-"::parser::mod" -> "::dependencies"
-"::parser::rust_parser" -> "::dependencies"
-"::parser::rust_parser" -> "::lazy_static"
-"::parser::rust_parser" -> "::parser::mod"
-"::parser::rust_parser" -> "::regex"
-"::parser::rust_parser" -> "::std"
-"::trie" -> "::std"
+"::formatter" -> "::dependencies_graph"
+"::parser" -> "::collections"
+"::parser" -> "::dependencies"
+"::parsers::mojo_parser" -> "::collections"
+"::parsers::mojo_parser" -> "::dependencies"
+"::parsers::mojo_parser" -> "::parser"
+
+"::filter" -> "::collections"
+"::filter" -> "::dependencies"
+"::filters::depth" -> "::collections"
+"::filters::depth" -> "::dependencies"
+"::filters::depth" -> "::filter"
+
+
 }
 

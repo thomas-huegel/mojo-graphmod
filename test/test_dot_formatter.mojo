@@ -6,7 +6,7 @@
 from collections import Deque
 from testing import assert_equal
 
-from dependencies import FilePathList
+from dependencies import DependencyPath
 from dependencies_graph import DependenciesGraph
 from formatter import Formatter
 from formatters.dot_formatter import DotFormatter
@@ -16,18 +16,22 @@ fn make_trie() raises -> DependenciesGraph:
     var trie = DependenciesGraph()
     _ = trie.insert(
         ["lib"],
-        FilePathList([[]]),
+        {},
     )
-    _ = trie.insert(["abc"], FilePathList([["foo", "mod"], ["lib"]]))
-    _ = trie.insert(["def"], FilePathList([["foo", "bar"]]))
-    _ = trie.insert(["foo", "bar"], FilePathList([["abc"], ["std"]]))
-    _ = trie.insert(["foo", "mod"], FilePathList([["foo", "bar"]]))
+    _ = trie.insert(
+        ["abc"], {DependencyPath(["foo", "mod"]), DependencyPath(["lib"])}
+    )
+    _ = trie.insert(["def"], {DependencyPath(["foo", "bar"])})
+    _ = trie.insert(
+        ["foo", "bar"], {DependencyPath(["abc"]), DependencyPath(["std"])}
+    )
+    _ = trie.insert(["foo", "mod"], {DependencyPath(["foo", "bar"])})
     return trie
 
 
 fn test_it_outputs_to_dot() raises:
     var trie = make_trie()
-    var result = DotFormatter.show(trie)
+    var result = DotFormatter.display(trie)
     var expected = """digraph dependencies {
   subgraph cluster_ {
   label=""

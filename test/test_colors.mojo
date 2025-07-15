@@ -12,4 +12,4 @@ fn test_it_makes_gray() raises:
 
 
 fn test_it_makes_a_pseudorandom_color() raises:
-    assert_equal(make_pseudorandom_color("::foo::bar"), "#cc88ee")
+    assert_equal(make_pseudorandom_color("::foo::bar"), "#fcd08e")

@@ -8,5 +8,5 @@ from dependencies_graph import DependenciesGraph
 
 trait Formatter:
     @staticmethod
-    fn show(trie: DependenciesGraph) raises -> String:
+    fn display(trie: DependenciesGraph) raises -> String:
         pass

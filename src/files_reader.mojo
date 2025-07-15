@@ -2,41 +2,34 @@
 # This file is part of Mojo Graphmod.
 # SPDX-License-Identifier: GPL-3.0-only
 
-from os.os import listdir
+from os.os import isdir, listdir
+from os.path import join
 from pathlib.path import Path
 
 from dependencies_graph import DependenciesGraph
+from filter import Filter
+from parser import Parser
 
 
-fn build_dependencies_trie(directory: Path) raises -> DependenciesGraph:
-    for file in listdir(directory):
-        print(file)
-    return DependenciesGraph()
-
-
-# pub fn build_dependencies_trie<LanguageParser: Parser>(
-#     path: &Path,
-#     trie: &mut DependenciesGraph,
-#     skip_length: usize,
-# ) -> Result<()> {
-#     if path.is_file() {
-#         if let Some(Some(EXTENSION)) = path.extension().map(|e| e.to_str()) {
-#             let contents = read_to_string(path)?;
-#             let components = path
-#                 .with_extension("")
-#                 .iter()
-#                 .skip(skip_length)
-#                 .map(|s| s.to_string_lossy().into())
-#                 .collect::<VecDeque<_>>();
-#             let dependencies = LanguageParser::parse_dependencies(&contents);
-#             trie.insert(components.clone(), dependencies);
-#         }
-#     } else if path.is_dir() {
-#         for entry in path.read_dir().expect("read_dir call failed").flatten() {
-#             build_dependencies_trie::<LanguageParser>(&entry.path(), trie, skip_length)?;
-#         }
-#     } else {
-#         read_to_string(path)?;
-#     }
-#     Ok(())
-# }
+fn build_dependencies_trie[
+    extension: StaticString, Filter: Filter, Parser: Parser
+](
+    mut trie: DependenciesGraph,
+    mut path_from_root: List[String],
+    path_to_explore: String,
+    filter: Filter,
+) raises:
+    if isdir(path_to_explore):
+        for file in listdir(path_to_explore):
+            path_from_root.append(String(file.rstrip(extension)))
+            build_dependencies_trie[extension, Filter, Parser](
+                trie, path_from_root, join(path_to_explore, file), filter
+            )
+            _ = path_from_root.pop()
+    else:
+        with open(path_to_explore, "r") as contents:
+            var dependencies = Parser.parse_dependencies(contents.read())
+            trie.insert(
+                filter.filter_source_paths(path_from_root),
+                filter.filter_dependencies(dependencies),
+            )

@@ -4,7 +4,7 @@
 
 from collections import Deque, Set
 
-from dependencies import FilePath
+from dependencies import DependencyPath
 from dependencies_graph import DependenciesGraph
 from formatter import Formatter
 from formatters.colors import make_gray, make_pseudorandom_color
@@ -19,7 +19,7 @@ fn _cluster_id(path: String) -> String:
     return CLUSTER_SEPARATOR.join(path.split(OUTPUT_SEPARATOR))
 
 
-fn _show_vertices(trie: DependenciesGraph, dirname: String, basename: String, level: UInt) raises -> String:
+fn _display_vertices(trie: DependenciesGraph, dirname: String, basename: String, level: UInt) raises -> String:
     var path = "" if not basename else dirname + OUTPUT_SEPARATOR + basename
     var indentation = "  " * level
     if len(trie.children) == 0:
@@ -35,19 +35,19 @@ fn _show_vertices(trie: DependenciesGraph, dirname: String, basename: String, le
             + String("{}color=\"{}\"\n").format(indentation, make_gray(level))
             + String("{}style=\"filled\"\n").format(indentation)
         for child in trie.children.items():
-            res = _show_vertices(child.value, path, child.key, level + 1)
+            res = _display_vertices(child.value, path, child.key, level + 1)
             result += res
         return result + String("{}}}\n").format(indentation)
     
 
-fn _make_vertex(path: FilePath) -> String:
+fn _make_vertex(path: DependencyPath) -> String:
     return OUTPUT_SEPARATOR + OUTPUT_SEPARATOR.join(path.value)
 
 
 fn _make_arrow(
     trie: DependenciesGraph,
-    current_path: FilePath,
-    dependency: FilePath,
+    current_path: DependencyPath,
+    dependency: DependencyPath,
 ) raises -> Optional[String]:
     if len(dependency) == 0:
         return None
@@ -57,35 +57,32 @@ fn _make_arrow(
         )
 
 
-fn _show_dependencies_from_vertex(
+fn _display_dependencies_from_vertex(
     current_trie: DependenciesGraph,
     whole_trie: DependenciesGraph,
-    current_path: FilePath,
-) raises -> Optional[String]:
-    var result = List[String]()
-    if not current_trie.value:
-        return None
-    else:
-        for dependency in current_trie.value.value().value:
-            var arrow = _make_arrow(whole_trie, current_path, dependency)
-            if arrow:
-                result.append(arrow.value())
-        return String("\n").join(result)
-
-fn _show_arcs(
-    current_trie: DependenciesGraph,
-    whole_trie: DependenciesGraph,
-    path: FilePath,
+    current_path: DependencyPath,
 ) raises -> String:
-    var result = _show_dependencies_from_vertex(
+    var result = List[String]()
+    for dependency in current_trie.value:
+        var arrow = _make_arrow(whole_trie, current_path, dependency)
+        if arrow:
+            result.append(arrow.value())
+    return String("\n").join(result)
+
+fn _display_arcs(
+    current_trie: DependenciesGraph,
+    whole_trie: DependenciesGraph,
+    path: DependencyPath,
+) raises -> String:
+    var result = _display_dependencies_from_vertex(
         current_trie,
         whole_trie,
         path,
-    ).or_else("")
+    )
 
     for child in current_trie.children.items():
-        var new_path = path + FilePath([child.key])
-        var arcs = _show_arcs(child.value, whole_trie, new_path)
+        var new_path = path + DependencyPath([child.key])
+        var arcs = _display_arcs(child.value, whole_trie, new_path)
         if arcs:
             result += arcs + "\n"
 
@@ -93,10 +90,10 @@ fn _show_arcs(
 
 struct DotFormatter(Formatter):
     @staticmethod
-    fn show(trie: DependenciesGraph) raises -> String:
+    fn display(trie: DependenciesGraph) raises -> String:
         return "digraph dependencies {\n"
-            + _show_vertices(trie, "", "", 1)
-            + _show_arcs(trie, trie, FilePath([]))
+            + _display_vertices(trie, "", "", 1)
+            + _display_arcs(trie, trie, DependencyPath([]))
             + "\n}\n"
 
 

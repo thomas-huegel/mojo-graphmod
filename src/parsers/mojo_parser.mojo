@@ -2,6 +2,8 @@
 # This file is part of Mojo Graphmod.
 # SPDX-License-Identifier: GPL-3.0-only
 
+from collections import Set
+
 from dependencies import DependencyPath
 from parser import Parser
 
@@ -10,8 +12,8 @@ alias INPUT_SEPARATOR = "::"
 
 struct MojoParser(Parser):
     @staticmethod
-    fn parse_dependencies(file_contents: String) -> List[DependencyPath]:
-        var dependencies = List[DependencyPath]()
+    fn parse_dependencies(file_contents: String) -> Set[DependencyPath]:
+        var dependencies = Set[DependencyPath]()
         for line in file_contents.splitlines():
             var words = line.lstrip().split(" ", 2)
             if (
@@ -20,10 +22,8 @@ struct MojoParser(Parser):
                 and words[2].startswith("import")
                 and not words[1].startswith(".")
             ):
-                print(words[1])
                 var dependency_path = DependencyPath([])
                 for element in words[1].split("."):
-                    print(element)
                     dependency_path.append(String(element))
-                dependencies.append(dependency_path)
+                dependencies.add(dependency_path)
         return dependencies^

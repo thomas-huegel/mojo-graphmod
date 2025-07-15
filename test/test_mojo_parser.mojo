@@ -2,7 +2,7 @@
 # This file is part of Mojo Graphmod.
 # SPDX-License-Identifier: GPL-3.0-only
 
-from testing import assert_equal
+from testing import assert_true
 
 from dependencies import DependencyPath
 from parsers.mojo_parser import MojoParser
@@ -18,10 +18,10 @@ fn main():
     from mylib import MyLib
     """
 
-    var dependencies = [
+    var dependencies = {
         DependencyPath(["python"]),
         DependencyPath(["hashlib", "hasher"]),
         DependencyPath(["mylib"]),
-    ]
+    }
 
-    assert_equal(MojoParser.parse_dependencies(mojo_program), dependencies)
+    assert_true(MojoParser.parse_dependencies(mojo_program) == dependencies)

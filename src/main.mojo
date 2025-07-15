@@ -10,7 +10,7 @@ from app_builder import mojo_graphmod
 
 fn main() raises:
     var args = argv()
-    if len(args) != 2:
-        print("Please specify the directory to examine!")
+    if len(args) != 3:
+        print("Please specify the directory to examine and the maximum depth!")
     else:
-        print(mojo_graphmod(Path(args[1])))
+        print(mojo_graphmod(Path(args[1]), Int(args[2])))
