@@ -5,7 +5,7 @@
 from testing import assert_true
 
 from dependencies import DependencyPath
-from parsers.mojo_parser import MojoParser
+from parsers.mojo import MojoParser
 
 
 fn test_it_parses_mojo_dependencies() raises:

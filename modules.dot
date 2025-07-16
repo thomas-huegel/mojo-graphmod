@@ -24,7 +24,7 @@ digraph dependencies {
     color="#dddddd"
     style="filled"
       "::parsers::__init__"[label="__init__",style="filled",fillcolor="#b797e7"]
-      "::parsers::mojo_parser"[label="mojo_parser",style="filled",fillcolor="#b797e7"]
+      "::parsers::mojo"[label="mojo",style="filled",fillcolor="#b797e7"]
     }
     "::filter"[label="filter",style="filled",fillcolor="#e3f38b"]
     subgraph cluster____filters {
@@ -43,7 +43,7 @@ digraph dependencies {
 "::app_builder" -> "::files_reader"
 "::app_builder" -> "::filters::depth"
 "::app_builder" -> "::formatters::dot_formatter"
-"::app_builder" -> "::parsers::mojo_parser"
+"::app_builder" -> "::parsers::mojo"
 "::files_reader" -> "::os::os"
 "::files_reader" -> "::os::path"
 "::files_reader" -> "::pathlib::path"
@@ -66,9 +66,9 @@ digraph dependencies {
 "::formatter" -> "::dependencies_graph"
 "::parser" -> "::collections"
 "::parser" -> "::dependencies"
-"::parsers::mojo_parser" -> "::collections"
-"::parsers::mojo_parser" -> "::dependencies"
-"::parsers::mojo_parser" -> "::parser"
+"::parsers::mojo" -> "::collections"
+"::parsers::mojo" -> "::dependencies"
+"::parsers::mojo" -> "::parser"
 
 "::filter" -> "::collections"
 "::filter" -> "::dependencies"
