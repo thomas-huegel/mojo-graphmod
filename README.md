@@ -14,7 +14,7 @@ A command for building Graphviz DOT files of dependency graphs between the modul
 
 You need to install:
 * [Graphviz](https://graphviz.org/)
-* the Mojo language.
+* the [Mojo](https://docs.modular.com/mojo/manual/get-started/) language.
 
 
 ## Usage
