@@ -16,6 +16,8 @@ fn build_dependencies_trie[
     Filter: Filter,
     Parser: Parser,
 ](
+    root_directory: String,
+    project_name: String,
     mut trie: DependenciesGraph,
     mut path_from_root: List[String],
     path_to_explore: String,
@@ -25,12 +27,19 @@ fn build_dependencies_trie[
         for file in listdir(path_to_explore):
             path_from_root.append(split_extension(file)[0])
             build_dependencies_trie[extensions, Filter, Parser](
-                trie, path_from_root, join(path_to_explore, file), filter
+                root_directory,
+                project_name,
+                trie,
+                path_from_root,
+                join(path_to_explore, file),
+                filter,
             )
             _ = path_from_root.pop()
     elif split_extension(path_to_explore)[1] in extensions:
         with open(path_to_explore, "r") as contents:
-            var dependencies = Parser.parse_dependencies(contents.read())
+            var dependencies = Parser.parse_dependencies(
+                contents.read(), path_from_root[:-1], root_directory, project_name
+            )
             trie.insert(
                 filter.filter_source_paths(path_from_root),
                 filter.filter_dependencies(dependencies),

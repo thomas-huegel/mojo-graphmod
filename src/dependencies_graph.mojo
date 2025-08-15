@@ -4,7 +4,7 @@
 
 from collections import Set
 
-from dependencies import DependencyPath
+from dependency_path import DependencyPath
 from trie import Trie
 
 

@@ -6,13 +6,13 @@
 from collections import Deque
 from testing import assert_equal
 
-from dependencies import DependencyPath
 from dependencies_graph import DependenciesGraph
+from dependency_path import DependencyPath
 from formatter import Formatter
 from formatters.dot_formatter import DotFormatter
 
 
-fn make_trie() raises -> DependenciesGraph:
+fn _make_trie() raises -> DependenciesGraph:
     var trie = DependenciesGraph()
     _ = trie.insert(
         ["lib"],
@@ -30,7 +30,7 @@ fn make_trie() raises -> DependenciesGraph:
 
 
 fn test_it_outputs_to_dot() raises:
-    var trie = make_trie()
+    var trie = _make_trie()
     var result = DotFormatter.display(trie)
     var expected = """digraph dependencies {
   subgraph cluster_ {

@@ -4,7 +4,7 @@
 
 from collections import Deque, Set
 
-from dependencies import DependencyPath
+from dependency_path import DependencyPath
 
 
 trait Filter:

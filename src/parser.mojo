@@ -4,10 +4,15 @@
 
 from collections import Set
 
-from dependencies import DependencyPath
+from dependency_path import DependencyPath
 
 
 trait Parser:
     @staticmethod
-    fn parse_dependencies(file_contents: String) -> Set[DependencyPath]:
+    fn parse_dependencies(
+        file_contents: String,
+        current_directory: List[String],
+        root_directory: String,
+        project_name: String,
+    ) -> Set[DependencyPath]:
         pass

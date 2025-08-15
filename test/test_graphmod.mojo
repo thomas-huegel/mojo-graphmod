@@ -8,6 +8,6 @@ from app_builder import mojo_graphmod
 
 
 fn test_it_generates_the_graphmod_graph() raises:
-    var output = mojo_graphmod("src", 16) + "\n"
+    var output = mojo_graphmod("src", 16, "mojo-graphmod") + "\n"
     with open("modules.dot", "r") as golden_master:
         assert_equal(output, golden_master.read())

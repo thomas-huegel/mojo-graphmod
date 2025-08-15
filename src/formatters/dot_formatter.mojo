@@ -4,8 +4,8 @@
 
 from collections import Deque, Set
 
-from dependencies import DependencyPath
 from dependencies_graph import DependenciesGraph
+from dependency_path import DependencyPath
 from formatter import Formatter
 from formatters.colors import make_gray, make_pseudorandom_color
 from trie import Trie
